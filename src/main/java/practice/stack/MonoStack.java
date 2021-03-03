@@ -1,7 +1,13 @@
 package practice.stack;
 
+import javafx.concurrent.Worker;
+import sun.nio.ch.ThreadPool;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.*;
 
 /**
  * 单调栈
@@ -23,8 +29,42 @@ public class MonoStack {
         return res;
     }
 
+    public String removeDuplicateLetters(String s) {
+        Stack<Character> stack = new Stack<>();
+        int[] count = new int[256];
+        boolean[] instack = new boolean[256];
+
+        for (int i = 0; i < s.length(); i++) {
+            count[i]++;
+        }
+
+        for (char c: s.toCharArray()) {
+            count[c]--;
+
+            if (instack[c]) {
+                continue;
+            }
+            instack[c] = true;
+
+            while(!stack.empty() && stack.peek() > c) {
+                if (count[stack.peek()] == 0) {
+                    break;
+                }
+                instack[stack.pop()] = false;
+            }
+
+            stack.push(c);
+        }
+
+        StringBuilder builder = new StringBuilder();
+        while (!stack.empty()) {
+            builder.append(stack.pop());
+        }
+        return builder.reverse().toString();
+    }
+
     public static void main(String[] args) {
         MonoStack stack = new MonoStack();
-        System.out.println(Arrays.toString(stack.nextGreaterElements(new int[]{2, 1, 2, 4, 3})));
+        System.out.println(stack.removeDuplicateLetters("bcabc"));
     }
 }
