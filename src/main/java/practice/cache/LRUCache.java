@@ -2,7 +2,22 @@ package practice.cache;
 
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+
+class LRUc<K, V> extends LinkedHashMap<K, V> {
+    private final int cacheSize;
+    public LRUc(int cacheSize) {
+        super(16, 0.75f, true);
+        this.cacheSize = cacheSize;
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<K, V> entry) {
+        return size() >= cacheSize;
+    }
+}
 
 public class LRUCache {
     public DoubleList list;
