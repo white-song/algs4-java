@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 class ListNode {
     int val;
@@ -16,6 +17,32 @@ class ListNode {
 public class Skill {
 
     Map<String, List<Integer>> memo = new HashMap<>();
+
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        int n = nums.length;
+        Deque<Integer> deque = new LinkedList<Integer>();
+        for (int i = 0; i < k; ++i) {
+            while (!deque.isEmpty() && nums[i] >= nums[deque.peekLast()]) {
+                deque.pollLast();
+            }
+            deque.offerLast(i);
+        }
+
+        int[] ans = new int[n - k + 1];
+        ans[0] = nums[deque.peekFirst()];
+        for (int i = k; i < n; ++i) {
+            while (!deque.isEmpty() && nums[i] >= nums[deque.peekLast()]) {
+                deque.pollLast();
+            }
+            deque.offerLast(i);
+            while (deque.peekFirst() <= i - k) {
+                deque.pollFirst();
+            }
+            ans[i - k + 1] = nums[deque.peekFirst()];
+        }
+        return ans;
+    }
+
     /**
      * 返回计算表达式的所有组合的结果
      */
@@ -94,10 +121,50 @@ public class Skill {
         return pre;
     }
 
+
+    // 计算表达式子(2+6* 3+5- (3*14/7+2)*5)+3
+    // 数字
+    // 括号
+    // 运算符号
+    public int calculate(String s) {
+        int curr = 0, res = 0, num = 0, n = s.length();
+        char op = '+';
+        for (int i = 0; i < n; i++) {
+            char c = s.charAt(i);
+            if (Character.isDigit(c)) {
+                num = num * 10 + (c - '0');
+            }
+            if (c == '(') {
+                int k = i, ch = 0;
+                for (; i < n; i++) {
+                    if (s.charAt(i) == '(') ch++;
+                    if (s.charAt(i) == ')') ch--;
+                    if (ch == 0) break;
+                }
+                num = calculate(s.substring(k + 1, i));
+            }
+
+            if (i == n - 1 || c == '+' || c == '-' || c == '*' || c == '/') {
+                switch (op) {
+                    case '+': curr += num; break;
+                    case '-': curr -= num; break;
+                    case '*': curr *= num; break;
+                    case '/': curr /= num; break;
+                    default: break;
+                }
+                if (i == n - 1 || c == '+' || c == '-') {
+                    res += curr;
+                    curr = 0;
+                }
+
+                op = c;
+                num = 0;
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
-        Integer a = new Integer(1);
-        Integer b = new Integer(3);
-        System.out.println(a.compareTo(b));
-        new HashMap<>();
-     }
+        System.out.println(new Skill().calculate("(2+6* 3+5- (3*14/7+2)*5)+3"));
+    }
 }
